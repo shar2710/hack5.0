@@ -1,0 +1,167 @@
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #e0f7fa, #ffffff);
+    color: #333;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Main Container */
+.container {
+    width: 90%;
+    max-width: 600px;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    margin: 20px 0;
+    transition: transform 0.3s ease-in-out;
+}
+
+.container:hover {
+    transform: scale(1.02);
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    justify-content: space-around;
+    padding: 12px;
+    background: linear-gradient(90deg, #007bff, #0056b3);
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.tab {
+    flex: 1;
+    padding: 14px;
+    cursor: pointer;
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.tab:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.tab.active {
+    background: #003d82;
+    border-radius: 8px;
+}
+
+/* Sections */
+.section {
+    display: none;
+    padding: 20px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.section.active {
+    display: block;
+}
+
+/* Input & Button Styles */
+input, textarea, button {
+    padding: 12px;
+    margin: 12px 0;
+    width: 90%;
+    border: none;
+    border-radius: 8px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 16px;
+    box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+                inset -4px -4px 8px rgba(255, 255, 255, 0.7);
+    outline: none;
+    transition: all 0.3s ease-in-out;
+}
+
+input:focus, textarea:focus {
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.4);
+}
+
+/* Button */
+button {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+button:hover {
+    background: linear-gradient(135deg, #0056b3, #003d82);
+    transform: scale(1.05);
+}
+
+/* ZK Proof Display */
+#zkProofDisplay, #patientZKProof {
+    font-weight: bold;
+    color: #008000;
+    background: rgba(0, 255, 0, 0.1);
+    padding: 10px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+/* Pharmacy List */
+#pharmacyList {
+    list-style: none;
+    padding: 0;
+}
+
+#pharmacyList li {
+    font-weight: bold;
+    color: green;
+    background: rgba(0, 128, 0, 0.1);
+    padding: 8px;
+    border-radius: 6px;
+    margin: 5px 0;
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .container {
+        width: 95%;
+        padding: 15px;
+    }
+
+    .tab {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    input, textarea, button {
+        font-size: 14px;
+        padding: 10px;
+    }
+}
