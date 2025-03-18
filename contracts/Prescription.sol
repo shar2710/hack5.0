@@ -11,8 +11,8 @@ contract Prescription {
 
     mapping(bytes32 => PrescriptionData) public prescriptions;
 
-    event PrescriptionIssued(address indexed doctor, bytes32 zkProofHash, uint256 expiryTimestamp);
-    event PrescriptionUsed(bytes32 zkProofHash, address indexed pharmacy);
+    event PrescriptionIssued(address indexed doctor, bytes32 indexed zkProofHash, uint256 expiryTimestamp);
+    event PrescriptionUsed(bytes32 indexed zkProofHash, address indexed pharmacy);
 
     // ✅ Issue a new prescription
     function issuePrescription(bytes32 _zkProofHash, uint256 _expiryTimestamp) external {
@@ -30,7 +30,7 @@ contract Prescription {
     }
 
     // ✅ Verify and use prescription
-    function verifyAndUsePrescription(bytes32 _zkProofHash) external {
+    function verifyAndUsePrescription(bytes32 _zkProofHash) external returns (bool) {
         PrescriptionData storage prescription = prescriptions[_zkProofHash];
 
         require(prescription.doctor != address(0), "Prescription does not exist");
@@ -40,11 +40,12 @@ contract Prescription {
         prescription.isUsed = true; // Mark as used
 
         emit PrescriptionUsed(_zkProofHash, msg.sender);
+        return true;
     }
 
     // ✅ Check if a prescription is valid (for frontend)
     function isValidPrescription(bytes32 _zkProofHash) external view returns (bool) {
-        PrescriptionData memory prescription = prescriptions[_zkProofHash];
+        PrescriptionData storage prescription = prescriptions[_zkProofHash];
 
         return (prescription.doctor != address(0) &&
                 !prescription.isUsed &&
