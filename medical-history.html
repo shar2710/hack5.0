@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Medical History</h1>
+    </header>
+
+    <div class="container" id="historyContainer">
+        <h2>Stored Prescription</h2>
+        <p><strong>Date Prescribed:</strong> <span id="datePrescribed"></span></p>
+        <p><strong>Doctor License:</strong> <span id="doctorLicense"></span></p>
+        <p><strong>Patient Name:</strong> <span id="patientName"></span></p>
+        <p><strong>Patient Age:</strong> <span id="patientAge"></span></p>
+        <p><strong>Patient Weight:</strong> <span id="patientWeight"></span></p>
+        <p><strong>Medical History:</strong> <span id="medicalHistory"></span></p>
+        <p><strong>Patient ID:</strong> <span id="patientID"></span></p>
+        <p><strong>Medicine:</strong> <span id="medicine"></span></p>
+        <p><strong>Dosage:</strong> <span id="dosage"></span></p>
+        <p><strong>Number of Tablets:</strong> <span id="tablets"></span></p>
+        <p><strong>Prescription Expiry Date:</strong> <span id="expiryDate"></span></p>
+        <p><strong>ZK Proof:</strong> <span id="zkProof"></span></p>
+
+        <a href="doctors.html" class="btn">Go Back</a>
+    </div>
+
+    <script>
+        function loadPrescription() {
+            const storedPrescription = JSON.parse(localStorage.getItem("prescription")) || {};
+            const storedZKProof = localStorage.getItem("zkProof") || "";
+
+            function getValue(key) {
+                return storedPrescription[key] ? storedPrescription[key] : "N/A";
+            }
+
+            document.getElementById("datePrescribed").innerText = getValue("datePrescribed"); // Always stored from doctor.html
+            document.getElementById("doctorLicense").innerText = getValue("doctorLicense");
+            document.getElementById("patientName").innerText = getValue("patientName");
+            document.getElementById("patientAge").innerText = getValue("patientAge");
+            document.getElementById("patientWeight").innerText = getValue("patientWeight");
+            document.getElementById("medicalHistory").innerText = getValue("medicalHistory");
+            document.getElementById("patientID").innerText = getValue("patientID");
+            document.getElementById("medicine").innerText = getValue("medicine");
+            document.getElementById("dosage").innerText = getValue("dosage");
+            document.getElementById("tablets").innerText = getValue("tablets");
+            document.getElementById("expiryDate").innerText = getValue("expiryDate");
+            document.getElementById("zkProof").innerText = storedZKProof;
+        }
+
+        window.onload = loadPrescription;
+    </script>
+</body>
+</html>

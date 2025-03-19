@@ -4,12 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafePrescribe - Home</title>
-    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #00FF7F, #00C853);
+            color: rgb(0, 0, 0);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        header {
+            width: 100%;
+            padding: 30px 20px;
+            position: absolute;
+            top: 40px;
+        }
+
+        h1 {
+            font-size: 3rem;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .btn {
+            text-decoration: none;
+            color: rgb(0, 0, 0);
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            border: 2px solid white;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
     <header>
         <h1>Welcome to SafePrescribe</h1>
         <p>Revolutionizing digital prescriptions with blockchain security.</p>
+        <p>Secure, efficient, and hassle-free digital prescriptions for doctors, patients, and pharmacists.</p>
     </header>
 
     <div class="button-container">

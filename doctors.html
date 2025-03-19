@@ -21,7 +21,7 @@
         }
 
         h1 {
-            margin: 0;
+            margin: 5;
         }
 
         .btn {
@@ -84,9 +84,10 @@
         <h1>Doctor's Dashboard</h1>
     </header>
 
-    <p>Welcome, Doctor! Here you can create and manage prescriptions.</p>
+    <p style="margin-left: 20px;">Welcome, Doctor! Here you can create and manage prescriptions.</p>
 
-    <a href="index.html" class="btn">Go Back</a>
+<a href="index.html" class="btn" style="margin-left: 20px; display: inline-block; padding: 10px 15px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Go Back</a>
+
     
     <div id="doctor" class="section active">
         <h2>Doctor - Create Prescription</h2>
@@ -115,6 +116,7 @@
                     dosage: document.getElementById("dosage").value,
                     tablets: document.getElementById("tabletCount").value,
                     expiryDate: document.getElementById("expiryDate").value,
+                    datePrescribed: new Date().toLocaleDateString(),
                 };
                 
                 localStorage.setItem("prescription", JSON.stringify(prescription));
@@ -142,6 +144,26 @@
         }
 
         document.getElementById('generateZKProof').addEventListener('click', generateZKProof);
+        document.getElementById('savePrescription').addEventListener('click', savePrescription);
+
+        function savePrescription() {
+            const prescription = {
+                doctorLicense: document.getElementById("doctorID").value,
+                patientName: document.getElementById("patientName").value,
+                patientAge: document.getElementById("patientAge").value,
+                patientWeight: document.getElementById("patientWeight").value,
+                medicalHistory: document.getElementById("medicalHistory").value,
+                patientID: document.getElementById("patientID").value,
+                medicine: document.getElementById("medicine").value,
+                dosage: document.getElementById("dosage").value,
+                tablets: document.getElementById("tabletCount").value,
+                expiryDate: document.getElementById("expiryDate").value,
+                datePrescribed: new Date().toLocaleDateString(),
+            };
+
+            localStorage.setItem("prescription", JSON.stringify(prescription));
+            alert("Prescription saved successfully!");
+        }
     </script>
 </body>
 </html>
