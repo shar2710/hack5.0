@@ -3,17 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient's Dashboard</title>
+    <title>Patient Dashboard</title>
     <link rel="stylesheet" href="styles/main.css">
+    <style>
+        .iframe-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .iframe-container iframe {
+            width: 100%;
+            height: 200px;
+            border: 0;
+            border-radius: 8px;
+        }
+        .iframe-container div {
+            border: 2px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <h1>Patient's Dashboard</h1>
+        <h1>Welcome, Patient</h1>
     </header>
 
-    <p>Welcome, Patient! View your prescriptions and medical history.</p>
+    <div class="dashboard">
+        <a href="medical-history.html" class="btn">View Medical History</a>
+    </div>
 
-    <a href="medical-history.html" class="btn">View Medical History</a>
-    <a href="index.html" class="btn">Go Back</a>
+    <div id="patient" class="section">
+        <h2>Patient - Your ZK Proof</h2>
+        <p>Use this proof at the pharmacy to get your medicine.</p>
+        <p>ZK Proof: <span id="patientZKProof">Fetching...</span></p>
+        <button onclick="copyProof()">Copy ZK Proof</button>
+
+        <div class="find-pharmacy-info">
+            <p>Find your pharmacy here:</p>
+        </div>
+
+        <div class="iframe-container">
+            <div>
+                <iframe src="https://www.google.com/maps/embed?pb=..."></iframe>
+                <p>Pharmacy 1</p>
+            </div>
+            <div>
+                <iframe src="https://www.google.com/maps/embed?pb=..."></iframe>
+                <p>Pharmacy 2</p>
+            </div>
+            <div>
+                <iframe src="https://www.google.com/maps/embed?pb=..."></iframe>
+                <p>Pharmacy 3</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchZKProof() {
+            try {
+                // Check if proof exists in localStorage first (from doctor)
+                let storedProof = localStorage.getItem("zkProof");
+                if (storedProof) {
+                    document.getElementById("patientZKProof").textContent = storedProof;
+                    return;
+                }
+
+                // If not found, fetch from backend
+                let response = await fetch("/api/getZKProof");
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                let data = await response.json();
+
+                if (!data || !data.zkProof) {
+                    throw new Error("Invalid proof data received.");
+                }
+
+                // Store in localStorage for patient access
+                localStorage.setItem("zkProof", data.zkProof);
+                document.getElementById("patientZKProof").textContent = data.zkProof;
+            } catch (error) {
+                console.error("Error fetching ZK Proof:", error);
+                document.getElementById("patientZKProof").textContent = "Error fetching proof";
+            }
+        }
+
+        function copyProof() {
+            const zkProofText = document.getElementById("patientZKProof").textContent;
+            if (zkProofText && zkProofText !== "Error fetching proof") {
+                navigator.clipboard.writeText(zkProofText)
+                    .then(() => alert("ZK Proof copied to clipboard!"))
+                    .catch(err => alert("Failed to copy ZK Proof: " + err));
+            } else {
+                alert("No valid proof to copy!");
+            }
+        }
+
+        window.onload = fetchZKProof;
+    </script>
 </body>
 </html>

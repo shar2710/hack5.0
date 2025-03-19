@@ -4,7 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pharmacist's Dashboard</title>
-    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 0;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .section {
+            padding: 20px;
+            margin: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            padding: 12px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -13,7 +77,58 @@
 
     <p>Welcome, Pharmacist! Verify and process prescriptions securely.</p>
 
-    <a href="locate-pharmacy.html" class="btn">Find Blockchain Pharmacies</a>
     <a href="index.html" class="btn">Go Back</a>
+
+    <div id="pharmacy" class="section">
+        <h2>Pharmacy - Verify Prescription</h2>
+        <input type="text" id="pharmacyInput" placeholder="Enter ZK Proof">
+        <button onclick="verifyProof()">Verify & Dispense</button>
+        <p id="pharmacyResult">Waiting for input...</p>
+    </div>
+
+    <script>
+        function verifyProof() {
+            const proof = document.getElementById("pharmacyInput").value.trim();
+            const storedProof = localStorage.getItem("zkProof");
+            const storedPrescription = localStorage.getItem("prescription");
+
+            if (!storedProof || !storedPrescription) {
+                document.getElementById("pharmacyResult").innerText = "No prescriptions found in system.";
+                return;
+            }
+
+            if (proof !== storedProof) {
+                document.getElementById("pharmacyResult").innerText = "Invalid proof! Prescription not found.";
+                return;
+            }
+
+            const prescription = JSON.parse(storedPrescription);
+
+            // Expiry date check
+            const expiryDate = new Date(prescription.expiryDate);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalize to compare only dates
+
+            if (expiryDate < today) {
+                document.getElementById('pharmacyResult').innerText = "Prescription expired. Request a new one from the doctor.";
+                return;
+            }
+
+            // Display prescription details
+            document.getElementById("pharmacyResult").innerHTML = `
+                <strong>Doctor Verified:</strong> Yes ✅<br>
+                <strong>Doctor License:</strong> ${prescription.doctorLicense}<br>
+                <strong>Patient ID:</strong> ${prescription.patientID}<br>
+                <strong>Medicine:</strong> ${prescription.medicine}<br>
+                <strong>Dosage:</strong> ${prescription.dosage}<br>
+                <strong>Tablets:</strong> ${prescription.tablets}<br>
+                <strong>Expiry Date:</strong> ${prescription.expiryDate} ✅<br>
+                <br><strong>✔ Medicines Dispensed Successfully</strong>
+            `;
+
+            // Mark as dispensed
+            localStorage.setItem("dispensed", "true");
+        }
+    </script>
 </body>
 </html>

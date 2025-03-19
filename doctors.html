@@ -4,7 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor's Dashboard</title>
-    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 0;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .section {
+            padding: 20px;
+            margin: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        input[type="date"] {
+            padding: 8px;
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            padding: 12px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -14,5 +87,61 @@
     <p>Welcome, Doctor! Here you can create and manage prescriptions.</p>
 
     <a href="index.html" class="btn">Go Back</a>
+    
+    <div id="doctor" class="section active">
+        <h2>Doctor - Create Prescription</h2>
+        <input type="text" id="doctorID" placeholder="Licence Number (For Verification)">
+        <input type="text" id="patientName" placeholder="Enter Patient Name">
+        <input type="number" id="patientAge" placeholder="Enter Patient Age">
+        <input type="number" id="patientWeight" placeholder="Enter Patient Weight (kg)">
+        <textarea id="medicalHistory" placeholder="Enter Medical History"></textarea>
+        <input type="text" id="patientID" placeholder="Enter Patient ID">
+        <input type="text" id="medicine" placeholder="Enter Medicine Name">
+        <input type="text" id="dosage" placeholder="Enter Dosage (e.g., 1 tablet)">
+        <input type="number" id="tabletCount" placeholder="Number of Tablets">
+        <input type="date" id="expiryDate" placeholder="Prescription Expiry Date">
+        <button type="button" id="generateZKProof">Generate ZK Proof</button>
+        <p>ZK Proof: <span id="zkProofDisplay">N/A</span></p>
+    </div>
+    
+    <script>
+        async function generateZKProof() {
+            try {
+                const prescription = {
+                    doctorVerified: "Yes",
+                    doctorLicense: document.getElementById("doctorID").value,
+                    patientID: document.getElementById("patientID").value,
+                    medicine: document.getElementById("medicine").value,
+                    dosage: document.getElementById("dosage").value,
+                    tablets: document.getElementById("tabletCount").value,
+                    expiryDate: document.getElementById("expiryDate").value,
+                };
+                
+                localStorage.setItem("prescription", JSON.stringify(prescription));
+
+                const proof = await fetchZKSyncProof();
+                localStorage.setItem("zkProof", proof);
+                document.getElementById('zkProofDisplay').innerText = proof;
+            } catch (error) {
+                console.error("Error generating ZK Proof:", error);
+                alert("Failed to generate ZK Proof. Please try again.");
+            }
+        }
+
+        async function fetchZKSyncProof() {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let proof = '';
+                    for (let i = 0; i < 16; i++) {
+                        proof += characters.charAt(Math.floor(Math.random() * characters.length));
+                    }
+                    resolve(proof);
+                }, 1500);
+            });
+        }
+
+        document.getElementById('generateZKProof').addEventListener('click', generateZKProof);
+    </script>
 </body>
 </html>

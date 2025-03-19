@@ -31,8 +31,60 @@ p {
     color: white;
     border-radius: 5px;
     font-size: 18px;
+    cursor: pointer;
 }
 
 .btn:hover {
     background-color: #0056b3;
+}
+
+/* Login Form */
+form {
+    max-width: 300px;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+}
+
+input {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button {
+    padding: 10px;
+    background-color: #007BFF;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+#pharmacy-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+#pharmacy-iframe {
+    width: 100%;
+    height: 450px;
+    border-radius: 10px;
+}
+
+.find-pharmacy-info {
+    font-size: 1.5rem; /* Increase font size */
+    font-weight: bold; /* Make text bold */
+    color: #333; /* Dark color for better contrast */
+    text-align: center; /* Center align the text */
+    margin-bottom: 20px; /* Add space below */
+}
+
+.find-pharmacy-info p {
+    margin: 10px 0; /* Add space between paragraphs */
+    font-size: 1.8rem; /* Make the text larger */
 }
