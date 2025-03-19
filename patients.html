@@ -6,23 +6,85 @@
     <title>Patient Dashboard</title>
     <link rel="stylesheet" href="styles/main.css">
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e8f5e9; /* Light green background */
+            color: #2e7d32; /* Dark green text */
+        }
+
+        header {
+            background-color: #4CAF50; /* Green header */
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 22px;
+        }
+
+        .dashboard {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #43A047; /* Green button */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background-color: #388E3C;
+        }
+
+        .section {
+            padding: 20px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            text-align: center;
+        }
+
+        button {
+            background-color: #388E3C; /* Dark green */
+            color: white;
+            border: none;
+            padding: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #2E7D32;
+        }
+
         .iframe-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             margin-top: 20px;
         }
+
         .iframe-container iframe {
             width: 100%;
             height: 200px;
             border: 0;
             border-radius: 8px;
         }
+
         .iframe-container div {
-            border: 2px solid #ddd;
+            border: 2px solid #4CAF50;
             padding: 10px;
             text-align: center;
             border-radius: 8px;
+            background-color: #f1f8e9;
         }
     </style>
 </head>
@@ -38,11 +100,11 @@
     <div id="patient" class="section">
         <h2>Patient - Your ZK Proof</h2>
         <p>Use this proof at the pharmacy to get your medicine.</p>
-        <p>ZK Proof: <span id="patientZKProof">Fetching...</span></p>
+        <p><strong>ZK Proof:</strong> <span id="patientZKProof">Fetching...</span></p>
         <button onclick="copyProof()">Copy ZK Proof</button>
 
         <div class="find-pharmacy-info">
-            <p>Find your pharmacy here:</p>
+            <p>Find your nearest pharmacy:</p>
         </div>
 
         <div class="iframe-container">
@@ -58,22 +120,32 @@
                 <iframe src="https://www.google.com/maps/embed?pb=..."></iframe>
                 <p>Pharmacy 3</p>
             </div>
+            <div>
+                <iframe src="https://www.google.com/maps/embed?pb=..."></iframe>
+                <p>Pharmacy 4</p>
+            </div>
+            <div>
+                <iframe src="https://www.google.com/maps/embed?pb=..."></iframe>
+                <p>Pharmacy 5</p>
+            </div>
+            <div>
+                <iframe src="https://www.google.com/maps/embed?pb=..."></iframe>
+                <p>Pharmacy 6</p>
+            </div>
         </div>
     </div>
 
     <script>
         async function fetchZKProof() {
             try {
-                // Check if proof exists in localStorage first (from doctor)
                 let storedProof = localStorage.getItem("zkProof");
                 if (storedProof) {
                     document.getElementById("patientZKProof").textContent = storedProof;
                     return;
                 }
 
-                // If not found, fetch from backend
                 let response = await fetch("/api/getZKProof");
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
@@ -84,7 +156,6 @@
                     throw new Error("Invalid proof data received.");
                 }
 
-                // Store in localStorage for patient access
                 localStorage.setItem("zkProof", data.zkProof);
                 document.getElementById("patientZKProof").textContent = data.zkProof;
             } catch (error) {

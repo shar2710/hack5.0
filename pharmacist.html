@@ -91,6 +91,13 @@
             const proof = document.getElementById("pharmacyInput").value.trim();
             const storedProof = localStorage.getItem("zkProof");
             const storedPrescription = localStorage.getItem("prescription");
+            const dispensedProof = localStorage.getItem("dispensedProof"); // Track which proof was used
+
+            // If the same proof has already been used, block re-dispensing
+            if (proof === dispensedProof) {
+                document.getElementById("pharmacyResult").innerText = "Medicine is already dispensed. Use another prescription!";
+                return;
+            }
 
             if (!storedProof || !storedPrescription) {
                 document.getElementById("pharmacyResult").innerText = "No prescriptions found in system.";
@@ -126,8 +133,8 @@
                 <br><strong>✔ Medicines Dispensed Successfully</strong>
             `;
 
-            // Mark as dispensed
-            localStorage.setItem("dispensed", "true");
+            // Mark this proof as used
+            localStorage.setItem("dispensedProof", proof);
         }
     </script>
 </body>
