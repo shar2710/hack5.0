@@ -12,12 +12,12 @@
             font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #e8f5e9; /* Light green background */
-            color: #2e7d32; /* Dark green text */
+            background-color: #e8f5e9;
+            color: #2e7d32;
         }
 
         header {
-            background-color: #4CAF50; /* Green header */
+            background-color: #4CAF50;
             color: white;
             text-align: center;
             padding: 20px;
@@ -32,7 +32,7 @@
         .btn {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #43A047; /* Green button */
+            background-color: #43A047;
             color: white;
             text-decoration: none;
             border-radius: 5px;
@@ -54,7 +54,7 @@
         }
 
         button {
-            background-color: #388E3C; /* Dark green */
+            background-color: #388E3C;
             color: white;
             border: none;
             padding: 12px;
@@ -65,28 +65,6 @@
 
         button:hover {
             background-color: #2E7D32;
-        }
-
-        .iframe-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .iframe-container iframe {
-            width: 100%;
-            height: 200px;
-            border: 0;
-            border-radius: 8px;
-        }
-
-        .iframe-container div {
-            border: 2px solid #4CAF50;
-            padding: 10px;
-            text-align: center;
-            border-radius: 8px;
-            background-color: #f1f8e9;
         }
     </style>
 </head>
@@ -100,84 +78,33 @@
     </div>
 
     <div id="patient" class="section">
-        <h2>Patient - Your ZK Proof</h2>
-        <p>Use this proof at the pharmacy to get your medicine.</p>
-        <p><strong>ZK Proof:</strong> <span id="patientZKProof">Fetching...</span></p>
-        <button onclick="copyProof()">Copy ZK Proof</button>
-
-        <div class="find-pharmacy-info">
-            <p>Find your nearest Secure Pharmacy:</p>
-        </div>
-
-        <div class="iframe-container">
-            <div>
-                <iframe src="https://www.google.com/maps/embed?pb=..."></iframe>
-                <p>Pharmacy 1</p>
-            </div>
-            <div>
-                <iframe src="https://www.google.com/maps/embed?pb=..."></iframe>
-                <p>Pharmacy 2</p>
-            </div>
-            <div>
-                <iframe src="https://www.google.com/maps/embed?pb=..."></iframe>
-                <p>Pharmacy 3</p>
-            </div>
-            <div>
-                <iframe src="https://www.google.com/maps/embed?pb=..."></iframe>
-                <p>Pharmacy 4</p>
-            </div>
-            <div>
-                <iframe src="https://www.google.com/maps/embed?pb=..."></iframe>
-                <p>Pharmacy 5</p>
-            </div>
-            <div>
-                <iframe src="https://www.google.com/maps/embed?pb=..."></iframe>
-                <p>Pharmacy 6</p>
-            </div>
-        </div>
+        <h2>Patient - Your Prescription</h2>
+        <p><strong>Transaction Hash:</strong> <span id="transactionHash">Fetching...</span></p>
+        <button onclick="copyTransactionHash()">Copy Transaction Hash</button>
     </div>
 
     <script>
-        async function fetchZKProof() {
-            try {
-                let storedProof = localStorage.getItem("zkProof");
-                if (storedProof) {
-                    document.getElementById("patientZKProof").textContent = storedProof;
-                    return;
-                }
-
-                let response = await fetch("/api/getZKProof");
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                let data = await response.json();
-
-                if (!data || !data.zkProof) {
-                    throw new Error("Invalid proof data received.");
-                }
-
-                localStorage.setItem("zkProof", data.zkProof);
-                document.getElementById("patientZKProof").textContent = data.zkProof;
-            } catch (error) {
-                console.error("Error fetching ZK Proof:", error);
-                document.getElementById("patientZKProof").textContent = "Error fetching proof";
-            }
-        }
-
-        function copyProof() {
-            const zkProofText = document.getElementById("patientZKProof").textContent;
-            if (zkProofText && zkProofText !== "Error fetching proof") {
-                navigator.clipboard.writeText(zkProofText)
-                    .then(() => alert("ZK Proof copied to clipboard!"))
-                    .catch(err => alert("Failed to copy ZK Proof: " + err));
+        function fetchTransactionHash() {
+            let storedHash = localStorage.getItem("transactionHash");
+            if (storedHash) {
+                document.getElementById("transactionHash").textContent = storedHash;
             } else {
-                alert("No valid proof to copy!");
+                document.getElementById("transactionHash").textContent = "No transaction found.";
             }
         }
 
-        window.onload = fetchZKProof;
+        function copyTransactionHash() {
+            const hashText = document.getElementById("transactionHash").textContent;
+            if (hashText !== "No transaction found.") {
+                navigator.clipboard.writeText(hashText)
+                    .then(() => alert("Transaction Hash copied to clipboard!"))
+                    .catch(err => alert("Failed to copy Transaction Hash: " + err));
+            } else {
+                alert("No valid transaction hash to copy!");
+            }
+        }
+
+        window.onload = fetchTransactionHash;
     </script>
 </body>
 </html>

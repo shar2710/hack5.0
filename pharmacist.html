@@ -3,138 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pharmacist's Dashboard</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-
-        header {
-            background-color: #4CAF50;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-
-        h1 {
-            margin: 0;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            margin: 10px 0;
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-
-        .btn:hover {
-            background-color: #45a049;
-        }
-
-        .section {
-            padding: 20px;
-            margin: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        input, button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            border-radius: 5px;
-            padding: 12px;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.2/web3.min.js"></script>
+    <title>Fetch Prescription</title>
 </head>
 <body>
-    <header>
-        <h1>Pharmacist's Dashboard</h1>
-    </header>
-
-    <p>Welcome, Pharmacist! Verify and process prescriptions securely.</p>
-
-    <a href="index.html" class="btn">Go Back</a>
-
-    <div id="pharmacy" class="section">
-        <h2>Pharmacy - Verify Prescription</h2>
-        <input type="text" id="pharmacyInput" placeholder="Enter ZK Proof">
-        <button onclick="verifyProof()">Verify & Dispense</button>
-        <p id="pharmacyResult">Waiting for input...</p>
-    </div>
+    <h2>Retrieve Prescription from Blockchain</h2>
+    <label for="txHash">Enter Transaction Hash:</label>
+    <input type="text" id="txHash" placeholder="Paste transaction hash here">
+    <button onclick="fetchPrescription()">Fetch Prescription</button>
+    <h3>Prescription Details:</h3>
+    <div id="prescriptionData"></div>
 
     <script>
-        function verifyProof() {
-            const proof = document.getElementById("pharmacyInput").value.trim();
-            const storedProof = localStorage.getItem("zkProof");
-            const storedPrescription = localStorage.getItem("prescription");
-            const dispensedProof = localStorage.getItem("dispensedProof"); // Track which proof was used
+        const web3 = new Web3("HTTP://127.0.0.1:7545"); // Change RPC if needed
+        const contractAddress = "0xe7B4d3b16C8432349Bd942e7CAf7f5357572A7f6";
 
-            // If the same proof has already been used, block re-dispensing
-            if (proof === dispensedProof) {
-                document.getElementById("pharmacyResult").innerText = "Medicine is already dispensed. Use another prescription!";
+        // ABI fragment (only the event needed for decoding)
+        const abi = [
+            {
+                "anonymous": false,
+                "inputs": [
+                    { "indexed": true, "name": "doctor", "type": "address" },
+                    { "indexed": false, "name": "proof", "type": "string" },
+                    { "indexed": false, "name": "patientName", "type": "string" },
+                    { "indexed": false, "name": "medicine", "type": "string" },
+                    { "indexed": false, "name": "dosage", "type": "string" },
+                    { "indexed": false, "name": "tablets", "type": "uint256" },
+                    { "indexed": false, "name": "expiryDate", "type": "string" }
+                ],
+                "name": "PrescriptionStored",
+                "type": "event"
+            }
+        ];
+
+        const contract = new web3.eth.Contract(abi, contractAddress);
+
+        async function fetchPrescription() {
+            const txHash = document.getElementById("txHash").value.trim();
+            if (!txHash) {
+                alert("Please enter a valid transaction hash.");
                 return;
             }
 
-            if (!storedProof || !storedPrescription) {
-                document.getElementById("pharmacyResult").innerText = "No prescriptions found in system.";
-                return;
+            try {
+                const receipt = await web3.eth.getTransactionReceipt(txHash);
+                console.log("Transaction Receipt:", receipt);
+
+                if (!receipt || !receipt.logs.length) {
+                    alert("No logs found in this transaction.");
+                    return;
+                }
+
+                // Get logs for the Prescription contract
+                const contractLogs = receipt.logs.filter(log => log.address.toLowerCase() === contractAddress.toLowerCase());
+
+                if (!contractLogs.length) {
+                    alert("No logs found for the Prescription contract.");
+                    return;
+                }
+
+                // Find event signature
+                const eventSignature = web3.utils.keccak256("PrescriptionStored(address,string,string,string,string,uint256,string)");
+                const log = contractLogs.find(log => log.topics[0] === eventSignature);
+
+                console.log("Event Log Found:", log);
+
+                if (!log) {
+                    alert("PrescriptionStored event not found.");
+                    return;
+                }
+
+                // Decode indexed field (doctor)
+                const doctorAddress = web3.eth.abi.decodeParameter("address", log.topics[1]);
+
+                // Decode non-indexed fields
+                const decoded = web3.eth.abi.decodeParameters(
+                    ["string", "string", "string", "string", "uint256", "string"], 
+                    log.data
+                );
+
+                console.log("Decoded Data:", decoded);
+
+                document.getElementById("prescriptionData").innerHTML = `
+                    <p><strong>Doctor Address:</strong> ${doctorAddress}</p>
+                    <p><strong>Proof ID:</strong> ${decoded[0]}</p>
+                    <p><strong>Patient Name:</strong> ${decoded[1]}</p>
+                    <p><strong>Medicine:</strong> ${decoded[2]}</p>
+                    <p><strong>Dosage:</strong> ${decoded[3]}</p>
+                    <p><strong>Tablets:</strong> ${decoded[4]}</p>
+                    <p><strong>Expiry Date:</strong> ${decoded[5]}</p>
+                `;
+
+            } catch (error) {
+                console.error("Error fetching prescription:", error);
+                alert("Error retrieving prescription. Check the console for details.");
             }
-
-            if (proof !== storedProof) {
-                document.getElementById("pharmacyResult").innerText = "Invalid proof! Prescription not found.";
-                return;
-            }
-
-            const prescription = JSON.parse(storedPrescription);
-
-            // Expiry date check
-            const expiryDate = new Date(prescription.expiryDate);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Normalize to compare only dates
-
-            if (expiryDate < today) {
-                document.getElementById('pharmacyResult').innerText = "Prescription expired. Request a new one from the doctor.";
-                return;
-            }
-
-            // Display prescription details
-            document.getElementById("pharmacyResult").innerHTML = `
-                <strong>Doctor Verified:</strong> Yes ✅<br>
-                <strong>Doctor License:</strong> ${prescription.doctorLicense}<br>
-                <strong>Patient ID:</strong> ${prescription.patientID}<br>
-                <strong>Medicine:</strong> ${prescription.medicine}<br>
-                <strong>Dosage:</strong> ${prescription.dosage}<br>
-                <strong>Tablets:</strong> ${prescription.tablets}<br>
-                <strong>Expiry Date:</strong> ${prescription.expiryDate} ✅<br>
-                <br><strong>✔ Medicines Dispensed Successfully</strong>
-            `;
-
-            // Mark this proof as used
-            localStorage.setItem("dispensedProof", proof);
         }
     </script>
 </body>

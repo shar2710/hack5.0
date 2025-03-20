@@ -2,82 +2,74 @@
 pragma solidity ^0.8.19;
 
 contract Prescription {
-
-    // Holds all relevant prescription data
     struct PrescriptionData {
         string doctorLicense;
         string patientName;
-        uint patientAge;
-        uint patientWeight;
+        uint256 patientAge;
+        uint256 patientWeight;
         string medicalHistory;
         string patientID;
         string medicine;
         string dosage;
-        uint tablets;
+        uint256 tablets;
         string expiryDate;
         string datePrescribed;
         bool isDispensed;
     }
 
-    // Maps a ZK proof (or unique ID string) to the PrescriptionData
     mapping(string => PrescriptionData) private prescriptions;
 
-    /**
-     * @dev Stores a new prescription by proof.
-     * @param _proof The ZK Proof or unique prescription ID (string).
-     * @param _data A struct containing all prescription details.
-     *              The 'isDispensed' field will be overridden to false.
-     */
-    function storePrescription(string memory _proof, PrescriptionData memory _data) public {
-        // Force the prescription to start as not dispensed
-        _data.isDispensed = false;
-        prescriptions[_proof] = _data;
-    }
+    event PrescriptionStored(
+        address indexed doctor, 
+        string proof,
+        string patientName,
+        string medicine,
+        string dosage,
+        uint256 tablets,
+        string expiryDate
+    );
+
+    event PrescriptionDispensed(string proof);
 
     /**
-     * @dev Retrieves the prescription details by proof.
-     * @param _proof The ZK Proof or unique prescription ID (string).
+     * @dev Stores a new prescription and emits an event.
      */
-    function getPrescription(string memory _proof)
-        public
-        view
-        returns (
-            string memory,
-            string memory,
-            uint,
-            uint,
-            string memory,
-            string memory,
-            string memory,
-            string memory,
-            uint,
-            string memory,
-            string memory,
-            bool
-        )
-    {
-        PrescriptionData memory p = prescriptions[_proof];
-        return (
-            p.doctorLicense,
-            p.patientName,
-            p.patientAge,
-            p.patientWeight,
-            p.medicalHistory,
-            p.patientID,
-            p.medicine,
-            p.dosage,
-            p.tablets,
-            p.expiryDate,
-            p.datePrescribed,
-            p.isDispensed
+    function storePrescription(string memory _proof, PrescriptionData memory _data) public {
+        require(bytes(_proof).length > 0, "Invalid proof ID");
+        require(bytes(prescriptions[_proof].patientID).length == 0, "Prescription already exists");
+        require(bytes(_data.patientID).length > 0, "Invalid patient ID");
+
+        _data.isDispensed = false;
+        prescriptions[_proof] = _data;
+
+        // 🔹 Emit event for pharmacists to retrieve from logs
+        emit PrescriptionStored(
+            msg.sender, 
+            _proof,
+            _data.patientName,
+            _data.medicine,
+            _data.dosage,
+            _data.tablets,
+            _data.expiryDate
         );
     }
 
     /**
-     * @dev Marks a prescription as dispensed (pharmacist calls this).
-     * @param _proof The ZK Proof or unique prescription ID (string).
+     * @dev Retrieves a prescription.
+     */
+    function getPrescription(string memory _proof) public view returns (PrescriptionData memory) {
+        require(bytes(prescriptions[_proof].patientID).length > 0, "Prescription not found");
+        return prescriptions[_proof];
+    }
+
+    /**
+     * @dev Marks a prescription as dispensed.
      */
     function dispensePrescription(string memory _proof) public {
+        require(bytes(prescriptions[_proof].patientID).length > 0, "Prescription not found");
+        require(!prescriptions[_proof].isDispensed, "Prescription already dispensed");
+
         prescriptions[_proof].isDispensed = true;
+        emit PrescriptionDispensed(_proof);
     }
 }
