@@ -16,5 +16,9 @@
     "url": "https://github.com/pradyumna14/hack5.0/issues"
   },
   "homepage": "https://github.com/pradyumna14/hack5.0#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "ethers": "^6.13.5",
+    "web3": "^4.16.0"
+  }
 }
