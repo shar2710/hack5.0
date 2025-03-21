@@ -101,14 +101,14 @@
         document.getElementById("connectWallet").addEventListener("click", async () => {
             if (typeof window.ethereum !== "undefined") {
                 try {
-                    // Request account access
+                
                     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
                     const userAddress = accounts[0];
 
-                    // Display wallet address
+                    
                     document.getElementById("accountInfo").innerText = `Connected: ${userAddress}`;
 
-                    // Update login links with wallet address
+                  
                     document.getElementById("doctorLogin").href = `login.html?role=doctor&wallet=${userAddress}`;
                     document.getElementById("patientLogin").href = `login.html?role=patient&wallet=${userAddress}`;
                     document.getElementById("pharmacistLogin").href = `login.html?role=pharmacist&wallet=${userAddress}`;

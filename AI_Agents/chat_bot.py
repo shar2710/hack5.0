@@ -4,13 +4,13 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 
-# Load environment variables from .env file
+
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-# Initialize OpenAI client with API key from environment variable
+
 openai_api_key = os.getenv("OPENAI_API_KEY")
 if not openai_api_key:
     raise ValueError("OPENAI_API_KEY is not set in the environment variables.")
@@ -23,7 +23,7 @@ def chat():
         user_message = data.get("message", "")
 
         response = openai_client.chat.completions.create(
-            model="gpt-4o-mini",  # Change to "gpt-3.5-turbo" if needed
+            model="gpt-4o-mini", 
             messages=[
                 {"role": "system", "content": "You are an AI doctor. Provide medical advice, but always recommend consulting a real doctor."},
                 {"role": "user", "content": user_message}

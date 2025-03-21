@@ -93,12 +93,12 @@
         <button type="submit" class="btn">Login with MetaMask</button>
     </form>
 
-    <!-- ✅ Fix: Use Web3.js via script tag -->
+    
     <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
 
     <script>
         document.getElementById("login-form").addEventListener("submit", async function(event) {
-            event.preventDefault(); // Prevent form from submitting traditionally
+            event.preventDefault(); 
 
             if (typeof window.ethereum === "undefined") {
                 alert("MetaMask is not installed. Please install it to continue.");
@@ -111,11 +111,9 @@
                 const userAddress = accounts[0];
                 localStorage.setItem("userAddress", userAddress);
 
-                // Extract role from URL (e.g., login.html?role=doctor)
                 const urlParams = new URLSearchParams(window.location.search);
                 const role = urlParams.get("role");
 
-                // Redirect based on role
                 if (role === "doctor") {
                     window.location.href = "doctors.html";
                 } else if (role === "patient") {
