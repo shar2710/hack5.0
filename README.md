@@ -7,4 +7,4 @@ Download Metamask Wallet extention in chrome browser
 import an address's private key from Ganache to metamask wallet.
 make a new network in metamask having same RPC URL: HTTP://127.0.0.1:7545
 
-launch the front end using Live Server Extention of VS Code and There you goo, You are inside world's more safe Prescription System
+Launch the frontend using Live Server Extention of VS Code and there you goo, you are inside world's most safe Prescription System
