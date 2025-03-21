@@ -16,25 +16,42 @@
 
     <script>
         const web3 = new Web3("HTTP://127.0.0.1:7545"); // Change RPC if needed
-        const contractAddress = "0xe7B4d3b16C8432349Bd942e7CAf7f5357572A7f6";
+        const contractAddress = "0x0105e5AFC10A97994aF941BaAC20A4373b4e951A";
+        const usedTransactions = new Set(JSON.parse(localStorage.getItem("usedTxHashes")) || []);
 
-        // ABI fragment (only the event needed for decoding)
         const abi = [
-            {
-                "anonymous": false,
-                "inputs": [
-                    { "indexed": true, "name": "doctor", "type": "address" },
-                    { "indexed": false, "name": "proof", "type": "string" },
-                    { "indexed": false, "name": "patientName", "type": "string" },
-                    { "indexed": false, "name": "medicine", "type": "string" },
-                    { "indexed": false, "name": "dosage", "type": "string" },
-                    { "indexed": false, "name": "tablets", "type": "uint256" },
-                    { "indexed": false, "name": "expiryDate", "type": "string" }
-                ],
-                "name": "PrescriptionStored",
-                "type": "event"
-            }
-        ];
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "name": "doctor", "type": "address" },
+            { "indexed": false, "name": "proof", "type": "string" },
+            { "indexed": false, "name": "patientName", "type": "string" },
+            { "indexed": false, "name": "medicine", "type": "string" },
+            { "indexed": false, "name": "dosage", "type": "string" },
+            { "indexed": false, "name": "tablets", "type": "uint256" },
+            { "indexed": false, "name": "expiryDate", "type": "string" }
+        ],
+        "name": "PrescriptionStored",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": false, "name": "proof", "type": "string" }
+        ],
+        "name": "PrescriptionDispensed",
+        "type": "event"
+    },
+    {
+        "constant": false,
+        "inputs": [{ "name": "proof", "type": "string" }],
+        "name": "dispensePrescription",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+];
 
         const contract = new web3.eth.Contract(abi, contractAddress);
 
@@ -42,6 +59,11 @@
             const txHash = document.getElementById("txHash").value.trim();
             if (!txHash) {
                 alert("Please enter a valid transaction hash.");
+                return;
+            }
+
+            if (usedTransactions.has(txHash)) {
+                alert("Already used prescription.");
                 return;
             }
 
@@ -54,7 +76,6 @@
                     return;
                 }
 
-                // Get logs for the Prescription contract
                 const contractLogs = receipt.logs.filter(log => log.address.toLowerCase() === contractAddress.toLowerCase());
 
                 if (!contractLogs.length) {
@@ -62,7 +83,6 @@
                     return;
                 }
 
-                // Find event signature
                 const eventSignature = web3.utils.keccak256("PrescriptionStored(address,string,string,string,string,uint256,string)");
                 const log = contractLogs.find(log => log.topics[0] === eventSignature);
 
@@ -73,10 +93,7 @@
                     return;
                 }
 
-                // Decode indexed field (doctor)
                 const doctorAddress = web3.eth.abi.decodeParameter("address", log.topics[1]);
-
-                // Decode non-indexed fields
                 const decoded = web3.eth.abi.decodeParameters(
                     ["string", "string", "string", "string", "uint256", "string"], 
                     log.data
@@ -92,13 +109,38 @@
                     <p><strong>Dosage:</strong> ${decoded[3]}</p>
                     <p><strong>Tablets:</strong> ${decoded[4]}</p>
                     <p><strong>Expiry Date:</strong> ${decoded[5]}</p>
+                    <button onclick="dispenseMedicine('${decoded[0]}', '${txHash}')">Dispense</button>
                 `;
-
             } catch (error) {
                 console.error("Error fetching prescription:", error);
                 alert("Error retrieving prescription. Check the console for details.");
             }
         }
+
+        async function dispenseMedicine(proofId, txHash) {
+    try {
+        const accounts = await web3.eth.getAccounts();
+        const userAccount = accounts[0];
+
+        const tx = await contract.methods.dispensePrescription(proofId).send({
+            from: userAccount,
+            gas: 300000
+        });
+
+        console.log("Dispense Transaction:", tx);
+        alert("Medicine has been dispensed!");
+
+        usedTransactions.add(txHash);
+        localStorage.setItem("usedTxHashes", JSON.stringify([...usedTransactions]));
+        document.getElementById("prescriptionData").innerHTML = "";
+    } catch (error) {
+        console.error("Error dispensing medicine:", error);
+        alert("Error processing the prescription.");
+    }
+}
+
+
+
     </script>
 </body>
 </html>
