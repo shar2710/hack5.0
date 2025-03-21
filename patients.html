@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Dashboard</title>
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
@@ -144,6 +146,8 @@
             text-align: left;
         }
 
+        #map { height: 500px; width: 40%; margin-top: 10px; }
+
     </style>
 </head>
 <body>
@@ -157,6 +161,7 @@
         <button onclick="copyTransactionHash()">Copy Transaction Hash</button>
     </div>
 
+
     <!-- Chatbot Container -->
     <div class="chat-container">
         <div class="chat-header">AI Health Assistant</div>
@@ -168,6 +173,15 @@
             <button onclick="sendMessage()">Send</button>
         </div>
     </div>
+
+
+    <h2>Find Pharmacies Anywhere</h2>
+    <input type="text" id="locationInput" placeholder="Enter a location (e.g., Delhi)">
+    <button onclick="searchPharmacy()">Search Pharmacies</button>
+    
+    <div id="map"></div>
+
+    
 
     <script>
         function fetchTransactionHash() {
@@ -227,5 +241,89 @@
 
         window.onload = fetchTransactionHash;
     </script>
+
+<script>
+    let map = L.map('map').setView([20, 78], 5);  // Default: India
+    
+    // Load OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    async function searchPharmacy() {
+        const location = document.getElementById('locationInput').value.trim();
+
+        if (!location) {
+            alert("Please enter a location!");
+            return;
+        }
+
+        try {
+            // Step 1: Convert location to lat/lon
+            let geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${location}`);
+            let geoData = await geoRes.json();
+
+            if (geoData.length === 0) {
+                alert("Location not found. Try again.");
+                return;
+            }
+
+            let lat = geoData[0].lat;
+            let lon = geoData[0].lon;
+            map.setView([lat, lon], 14);
+
+            // Step 2: Query Overpass API with a larger radius (10km)
+            let overpassQuery = `
+                [out:json];
+                (
+                    node["amenity"="pharmacy"](around:10000,${lat},${lon});
+                    way["amenity"="pharmacy"](around:10000,${lat},${lon});
+                    relation["amenity"="pharmacy"](around:10000,${lat},${lon});
+                );
+                out center;`;
+
+            let overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
+            
+            let overpassRes = await fetch(overpassUrl);
+            let overpassData = await overpassRes.json();
+
+            // Clear previous markers
+            map.eachLayer(layer => {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            if (!overpassData.elements.length) {
+                alert("No pharmacies found in this area.");
+                return;
+            }
+
+            // Step 3: Display pharmacies on the map
+            overpassData.elements.forEach(pharmacy => {
+                let { lat, lon, tags } = pharmacy;
+                let name = tags.name || "Unnamed Pharmacy";
+                
+                // Some ways/relations have center nodes instead of lat/lon
+                if (!lat || !lon) {
+                    if (pharmacy.center) {
+                        lat = pharmacy.center.lat;
+                        lon = pharmacy.center.lon;
+                    } else return;
+                }
+
+                L.marker([lat, lon])
+                    .addTo(map)
+                    .bindPopup(`<b>${name}</b><br>${tags["addr:street"] || "No Address Available"}`);
+            });
+
+        } catch (error) {
+            console.error("Error fetching pharmacies:", error);
+            alert("Something went wrong. Try again.");
+        }
+    }
+</script>
+
+
 </body>
 </html>
