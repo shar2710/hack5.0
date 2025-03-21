@@ -14,6 +14,9 @@
             padding: 0;
             background-color: #e8f5e9;
             color: #2e7d32;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         header {
@@ -22,25 +25,7 @@
             text-align: center;
             padding: 20px;
             font-size: 22px;
-        }
-
-        .dashboard {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #43A047;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-
-        .btn:hover {
-            background-color: #388E3C;
+            width: 100%;
         }
 
         .section {
@@ -51,6 +36,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             max-width: 800px;
             text-align: center;
+            width: 90%;
         }
 
         button {
@@ -61,11 +47,103 @@
             cursor: pointer;
             font-size: 16px;
             border-radius: 5px;
+            transition: 0.3s;
         }
 
         button:hover {
             background-color: #2E7D32;
         }
+
+        /* Chatbot Styling */
+        .chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            max-height: 500px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 2px solid #4CAF50;
+        }
+
+        .chat-header {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            scroll-behavior: smooth;
+        }
+
+        .chat-footer {
+            display: flex;
+            padding: 10px;
+            background: #f1f1f1;
+            border-top: 1px solid #ccc;
+        }
+
+        .chat-footer input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            outline: none;
+            border-radius: 5px;
+        }
+
+        .chat-footer button {
+            margin-left: 5px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .chat-footer button:hover {
+            background: #388E3C;
+        }
+
+        .chat-message {
+            max-width: 70%;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 5px 0;
+            font-size: 14px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+
+        .chat-message.user {
+            align-self: flex-end;
+            background: #388E3C;
+            color: white;
+            text-align: right;
+        }
+
+        .chat-message.bot {
+            align-self: flex-start;
+            background: #e0e0e0;
+            color: black;
+            text-align: left;
+        }
+
     </style>
 </head>
 <body>
@@ -79,14 +157,22 @@
         <button onclick="copyTransactionHash()">Copy Transaction Hash</button>
     </div>
 
+    <!-- Chatbot Container -->
+    <div class="chat-container">
+        <div class="chat-header">AI Health Assistant</div>
+        <div class="chat-body" id="chatBody">
+            <div class="chat-message bot">Hello! How can I assist you today?</div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
     <script>
         function fetchTransactionHash() {
             let storedHash = localStorage.getItem("transactionHash");
-            if (storedHash) {
-                document.getElementById("transactionHash").textContent = storedHash;
-            } else {
-                document.getElementById("transactionHash").textContent = "No transaction found.";
-            }
+            document.getElementById("transactionHash").textContent = storedHash || "No transaction found.";
         }
 
         function copyTransactionHash() {
@@ -97,6 +183,45 @@
                     .catch(err => alert("Failed to copy Transaction Hash: " + err));
             } else {
                 alert("No valid transaction hash to copy!");
+            }
+        }
+
+        function sendMessage() {
+            const inputField = document.getElementById("chatInput");
+            const message = inputField.value.trim();
+            if (!message) return;
+
+            appendMessage(message, "user");
+
+            fetch("http://127.0.0.1:5000/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                appendMessage(data.response, "bot");
+            })
+            .catch(() => {
+                appendMessage("Unable to connect to server.", "bot");
+            });
+
+            inputField.value = "";
+            inputField.focus();
+        }
+
+        function appendMessage(text, sender) {
+            const chatBody = document.getElementById("chatBody");
+            const messageDiv = document.createElement("div");
+            messageDiv.textContent = text;
+            messageDiv.className = "chat-message " + sender;
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
             }
         }
 
